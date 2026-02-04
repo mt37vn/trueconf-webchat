@@ -1,6 +1,17 @@
 # TrueConf Web Chat MVP - Deployment & Integration
 
-## 1. Windows Server Deployment
+## 1. Render.com Deployment (Recommended for Cloud/HTTPS)
+Render provides managed infrastructure and automatic SSL (HTTPS).
+
+1. **GitHub**: Push your code to a GitHub repository.
+2. **New Service**: In [Render](https://render.com/), create a "New Web Service" from your GitHub repo.
+3. **Environment**: Select **Node** as the Runtime.
+4. **Variables**: Add your `.env` variables in the **Environment** tab.
+5. **Networking**: Render will automatically expose the app and provide an HTTPS domain (`*.onrender.com`).
+
+---
+
+## 2. Windows Server Deployment (Local)
 
 ### Prerequisites
 - Node.js 20 LTS installed.
@@ -49,7 +60,10 @@ add_action('wp_enqueue_scripts', 'add_trueconf_widget');
 
 ## 4. Important Notes
 - **Multi-Guest Support**: The system now automatically creates a new group chat for every visitor. There is no need to manually configure room IDs.
-- **SSL/HTTPS**: If your WordPress site uses HTTPS, your Node.js server MUST also use HTTPS. The recommended way is using a reverse proxy like **Caddy** or **Nginx**.
+- **SSL/HTTPS**: If your WordPress site uses HTTPS, your Node.js server MUST also use HTTPS.
+    - **Render**: Handles SSL automatically (Recommended).
+    - **Cloudflare Tunnel**: Good for local servers with port conflicts (See `CLOUDFLARE_GUIDE.md`).
+    - **Reverse Proxy**: Setup Caddy or Nginx manually.
 - **CORS**: The current server allows all connections, but for production, you should restrict origins in the WebSocket and Express configuration.
 
 ---
@@ -62,6 +76,10 @@ Caddy automatically handles SSL certificates. Add this to your `Caddyfile`:
 ```caddy
 chatbot.yourdomain.com {
     reverse_proxy localhost:3000
+    # For DNS-01 validation (if port 80/443 are blocked)
+    # tls {
+    #     dns <provider> <token>
+    # }
 }
 ```
 

@@ -20,3 +20,5 @@ logs/
 ssl/
 *.pem
 *.key
+# Private Manuals
+CLOUDFLARE_GUIDE.md
