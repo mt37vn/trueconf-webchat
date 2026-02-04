@@ -1,11 +1,8 @@
 /* public/widget.js */
 (function () {
+    const CHAT_BACKEND = window.TRUECONF_CHAT_BACKEND || "wss://trueconf-webchat.onrender.com";
     const CONFIG = {
-        // Automatically determine server URL based on where the script is loaded from
-        serverUrl: (() => {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            return `${protocol}//${window.location.host}`;
-        })(),
+        serverUrl: CHAT_BACKEND,
         title: 'Support Chat',
         subtitle: 'Online',
         site: window.location.hostname || 'unknown-site'
