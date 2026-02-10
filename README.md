@@ -22,7 +22,10 @@ Use the `POST /api/contact` endpoint for your existing forms:
 ```javascript
 fetch('https://your-service.onrender.com/api/contact', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': 'your_secret_key' // Match the CONTACT_API_KEY in Render.com
+    },
     body: JSON.stringify({
         name: "User Name",
         email: "user@example.com",
