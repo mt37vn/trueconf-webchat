@@ -33,9 +33,26 @@ const API_KEY = process.env.API_KEY;
 const authenticate = (req, res, next) => {
     // If API_KEY is set, check for X-API-Key header
     if (API_KEY) {
+        const origin = req.header('Origin') || req.header('Referer');
+        const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
+
+        // Skip API key check if request is from an allowed origin
+        const isAllowedOrigin = allowedOrigins.some(allowed => {
+            if (origin) {
+                return origin.startsWith(allowed) || origin.includes(allowed);
+            }
+            return false;
+        });
+
+        if (isAllowedOrigin) {
+            log('info', `Skipping API key check for allowed origin: ${origin}`);
+            return next();
+        }
+
+        // Otherwise, require API key
         const providedKey = req.header('X-API-Key');
         if (providedKey !== API_KEY) {
-            log('warn', `Unauthorized access attempt from ${req.ip}`);
+            log('warn', `Unauthorized access attempt from ${req.ip} (origin: ${origin})`);
             return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
         }
     }
@@ -111,10 +128,24 @@ wss.on('connection', async (ws) => {
                 const { name, phone, site, apiKey } = message;
 
                 // Validate API Key for WebSocket if configured
-                if (API_KEY && apiKey !== API_KEY) {
-                    log('warn', `Unauthorized WebSocket init attempt for ${socketId}`);
-                    ws.send(JSON.stringify({ type: 'error', text: 'Unauthorized: Invalid API Key' }));
-                    return;
+                if (API_KEY) {
+                    const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
+
+                    // Check if the site is in allowed origins (skip API key check)
+                    const isAllowedSite = allowedOrigins.some(allowed => {
+                        return site && (site.includes(allowed.replace(/^https?:\/\//, '').replace(/^www\./, '')) ||
+                            allowed.includes(site));
+                    });
+
+                    if (!isAllowedSite && apiKey !== API_KEY) {
+                        log('warn', `Unauthorized WebSocket init attempt for ${socketId} from site: ${site}`);
+                        ws.send(JSON.stringify({ type: 'error', text: 'Unauthorized: Invalid API Key' }));
+                        return;
+                    }
+
+                    if (isAllowedSite) {
+                        log('info', `Skipping API key check for allowed site: ${site}`);
+                    }
                 }
 
                 log('info', `Initializing session for ${socketId} (${name}, ${phone}, ${site})`);
