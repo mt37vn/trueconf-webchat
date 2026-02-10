@@ -2,10 +2,22 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const trueconf = require('./trueconf');
+const mailer = require('./mailer');
 require('dotenv').config();
 
 const app = express();
+
+// Security: Enable CORS for specific origin
+const corsOptions = {
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+    methods: ['GET', 'POST'],
+};
+app.use(cors(corsOptions));
+app.use(express.json()); // Handle JSON bodies for contact form
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
@@ -35,6 +47,35 @@ const socketToMeta = new Map();   // socketId -> { name, phone, site }
 
 // Serve static files (widget.js, widget.css)
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Contact Form API Endpoint
+const contactLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 requests per window
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+app.post('/api/contact', contactLimit, async (req, res) => {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email, and message are required.' });
+    }
+
+    log('info', `Received contact form from ${name} (${email})`);
+
+    try {
+        const result = await mailer.sendContactEmail(req.body);
+        if (result.success) {
+            res.status(200).json({ message: 'Message sent successfully.' });
+        } else {
+            res.status(500).json({ error: 'Failed to send message.', details: result.error });
+        }
+    } catch (err) {
+        log('error', 'Unexpected error in contact API', { error: err.message });
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+});
 
 // WebSocket handling for browser clients
 wss.on('connection', async (ws) => {
