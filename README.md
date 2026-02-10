@@ -1,6 +1,6 @@
 # TrueConf Web Chat & Mailer Service
 
-A lightweight Node.js service that powers the TrueConf web chat widget and provides a secure contact form mail sender.
+A lightweight Node.js service that powers the TrueConf web chat widget and provide a secure contact form mail sender.
 
 ## Features
 - **Real-time Chat**: Connects web guests to support staff via TrueConf group chats.
@@ -14,18 +14,15 @@ A lightweight Node.js service that powers the TrueConf web chat widget and provi
 ### Chat Widget
 Add the following to your HTML before `</body>`:
 ```html
-<script src="https://your-service.onrender.com/widget.js"></script>
+<script src="https://trueconf-webchat.onrender.com/widget.js"></script>
 ```
 
 ### Contact Form API
 Use the `POST /api/contact` endpoint for your existing forms:
 ```javascript
-fetch('https://your-service.onrender.com/api/contact', {
+fetch('https://trueconf-webchat.onrender.com/api/contact', {
     method: 'POST',
-    headers: { 
-        'Content-Type': 'application/json',
-        'X-API-Key': 'your_secret_key' // Match the CONTACT_API_KEY in Render.com
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
         name: "User Name",
         email: "user@example.com",
@@ -39,11 +36,11 @@ fetch('https://your-service.onrender.com/api/contact', {
 
 ## 2. Security Measures
 
-- **CORS Whitelist**: Access is restricted to trusted origins (configured via `ALLOWED_ORIGINS`).
-- **Rate Limiting**: Mail sender is limited to 5 requests per 15 minutes per IP to prevent spam.
-- **Environment Isolation**: No secrets are stored in the codebase; all configuration is environment-driven.
+- **CORS Enforcement**: Only permitted origins (configured via `ALLOWED_ORIGINS`) can access the API.
+- **Rate Limiting**: Protected against spam with a limit of 5 requests per 15 minutes per IP.
+- **Trust Proxy**: Configured for Render.com to ensure accurate rate limiting through the load balancer.
 
 ---
 
 ## 3. Deployment
-Refer to [DEPLOYMENT.md](file:///Users/tuanbm/trueconf_chatbot/DEPLOYMENT.md) for the exclusive Render.com setup guide.
+Refer to [DEPLOYMENT.md](file:///Users/tuanbm/trueconf_chatbot/DEPLOYMENT.md) for the Render.com setup guide.

@@ -59,14 +59,6 @@ const contactLimit = rateLimit({
 });
 
 app.post('/api/contact', contactLimit, async (req, res) => {
-    const apiKey = req.headers['x-api-key'];
-    const requiredApiKey = process.env.CONTACT_API_KEY;
-
-    if (requiredApiKey && apiKey !== requiredApiKey) {
-        log('warn', `Unauthorized contact API attempt from ${req.ip}`);
-        return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
-    }
-
     const { name, email, subject, message } = req.body;
 
     if (!name || !email || !message) {
