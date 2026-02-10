@@ -27,6 +27,20 @@ const wss = new WebSocket.Server({ server });
 const PORT = process.env.PORT || 3000;
 const BOT_USER = process.env.BOT_USER;
 const STAFF_USER = process.env.STAFF_USER;
+const API_KEY = process.env.API_KEY;
+
+// Authentication middleware for HTTP routes
+const authenticate = (req, res, next) => {
+    // If API_KEY is set, check for X-API-Key header
+    if (API_KEY) {
+        const providedKey = req.header('X-API-Key');
+        if (providedKey !== API_KEY) {
+            log('warn', `Unauthorized access attempt from ${req.ip}`);
+            return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+        }
+    }
+    next();
+};
 
 // Validate environment variables
 const requiredEnv = ['TRUECONF_SERVER', 'CLIENT_ID', 'CLIENT_SECRET', 'BOT_USER', 'STAFF_USER'];
@@ -58,7 +72,7 @@ const contactLimit = rateLimit({
     message: { error: 'Too many requests, please try again later.' }
 });
 
-app.post('/api/contact', contactLimit, async (req, res) => {
+app.post('/api/contact', contactLimit, authenticate, async (req, res) => {
     const { name, email, subject, message } = req.body;
 
     if (!name || !email || !message) {
@@ -94,7 +108,15 @@ wss.on('connection', async (ws) => {
         try {
             const message = JSON.parse(data);
             if (message.type === 'init') {
-                const { name, phone, site } = message;
+                const { name, phone, site, apiKey } = message;
+
+                // Validate API Key for WebSocket if configured
+                if (API_KEY && apiKey !== API_KEY) {
+                    log('warn', `Unauthorized WebSocket init attempt for ${socketId}`);
+                    ws.send(JSON.stringify({ type: 'error', text: 'Unauthorized: Invalid API Key' }));
+                    return;
+                }
+
                 log('info', `Initializing session for ${socketId} (${name}, ${phone}, ${site})`);
 
                 try {

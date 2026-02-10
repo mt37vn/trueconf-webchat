@@ -20,6 +20,7 @@ In the Render Dashboard, add the following key-value pairs in the **Environment*
 | `MAIL_FROM` | From address header |
 | `MAIL_TO` | Recipient address for form submissions |
 | `ALLOWED_ORIGINS` | Comma-separated allowed origins (e.g., `https://truecon.vn`) |
+| `API_KEY` | (Optional) Secret key for backend testing. **Set only in Render Env, never in code.** |
 
 ## Deployment Steps
 1. Push your code to a GitHub repository.

@@ -14,15 +14,26 @@ A lightweight Node.js service that powers the TrueConf web chat widget and provi
 ### Chat Widget
 Add the following to your HTML before `</body>`:
 ```html
+<link rel="stylesheet" href="https://trueconf-webchat.onrender.com/widget.css">
 <script src="https://trueconf-webchat.onrender.com/widget.js"></script>
 ```
 
 ### Contact Form API
-Use the `POST /api/contact` endpoint for your existing forms:
+Use the `POST /api/contact` endpoint. 
+
+#### Option A: Frontend Integration
+If calling from a browser, ensure your domain is in `ALLOWED_ORIGINS`. No API Key is needed in the JS code.
+
+#### Option B: Backend Integration (Secure)
+If calling from another server (or testing via `curl`), include the `X-API-Key` header:
 ```javascript
+// Secure backend-to-backend call
 fetch('https://trueconf-webchat.onrender.com/api/contact', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.CHAT_API_KEY // Stored securely on your server
+    },
     body: JSON.stringify({
         name: "User Name",
         email: "user@example.com",
@@ -36,7 +47,8 @@ fetch('https://trueconf-webchat.onrender.com/api/contact', {
 
 ## 2. Security Measures
 
-- **CORS Enforcement**: Only permitted origins (configured via `ALLOWED_ORIGINS`) can access the API.
+- **Frontend Security (CORS)**: Access is restricted to domains in `ALLOWED_ORIGINS`. Use this for browser-based integration.
+- **Backend Security (API Key)**: Configure `API_KEY` in Render.com environment variables. Use this for server-side calls or cross-origin testing. **Never expose this key in public JavaScript files.**
 - **Rate Limiting**: Protected against spam with a limit of 5 requests per 15 minutes per IP.
 - **Trust Proxy**: Configured for Render.com to ensure accurate rate limiting through the load balancer.
 
