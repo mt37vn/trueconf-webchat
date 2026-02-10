@@ -10,6 +10,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Security: Enable trust proxy for Render.com (load balancer)
+app.set('trust proxy', 1);
+
 // Security: Enable CORS for specific origin
 const corsOptions = {
     origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',

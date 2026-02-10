@@ -1,14 +1,12 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const {
-    MAIL_HOST,
-    MAIL_PORT,
-    MAIL_USER,
-    MAIL_PASS,
-    MAIL_FROM,
-    MAIL_TO
-} = process.env;
+const MAIL_HOST = process.env.MAIL_HOST ? process.env.MAIL_HOST.trim() : '';
+const MAIL_PORT = process.env.MAIL_PORT;
+const MAIL_USER = process.env.MAIL_USER ? process.env.MAIL_USER.trim() : '';
+const MAIL_PASS = process.env.MAIL_PASS ? process.env.MAIL_PASS.trim() : '';
+const MAIL_FROM = process.env.MAIL_FROM;
+const MAIL_TO = process.env.MAIL_TO ? process.env.MAIL_TO.trim() : '';
 
 // Check if mailer is configured
 const isConfigured = MAIL_HOST && MAIL_USER && MAIL_PASS && MAIL_TO;
