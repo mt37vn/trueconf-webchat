@@ -14,8 +14,8 @@ A lightweight Node.js service that powers the TrueConf web chat widget and provi
 ### Chat Widget
 Add the following to your HTML before `</body>`:
 ```html
-<link rel="stylesheet" href="https://trueconf-webchat.onrender.com/widget.css">
-<script src="https://trueconf-webchat.onrender.com/widget.js"></script>
+<link rel="stylesheet" href="http://103.232.121.14:3000/widget.css">
+<script src="http://103.232.121.14:3000/widget.js"></script>
 ```
 
 ### Contact Form API
@@ -28,7 +28,7 @@ If calling from a browser, ensure your domain is in `ALLOWED_ORIGINS`. No API Ke
 If calling from another server (or testing via `curl`), include the `X-API-Key` header:
 ```javascript
 // Secure backend-to-backend call
-fetch('https://trueconf-webchat.onrender.com/api/contact', {
+fetch('http://103.232.121.14:3000/api/contact', {
     method: 'POST',
     headers: { 
         'Content-Type': 'application/json',
