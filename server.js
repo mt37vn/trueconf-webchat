@@ -254,18 +254,27 @@ trueconf.onChatMessage = (payload) => {
     }
 };
 
-// Initialize TrueConf connection before starting server
-async function init() {
-    try {
-        await trueconf.connect();
-        server.listen(PORT, () => {
-            console.log(`Server running at http://localhost:${PORT}`);
-            console.log(`Widget available at http://localhost:${PORT}/widget.js`);
-        });
-    } catch (err) {
-        console.error('Failed to initialize TrueConf API:', err);
-        process.exit(1);
-    }
+// Initialize TrueConf connection with retry
+async function connectTrueConfWithRetry() {
+    const maxDelay = 30000;
+    let attempt = 0;
+    const tryConnect = async () => {
+        attempt++;
+        try {
+            await trueconf.connect();
+            log('info', 'TrueConf API connected successfully');
+        } catch (err) {
+            const delay = Math.min(1000 * Math.pow(2, attempt), maxDelay);
+            log('warn', `TrueConf connection failed (attempt ${attempt}), retrying in ${delay / 1000}s`, { error: err.message });
+            setTimeout(tryConnect, delay);
+        }
+    };
+    tryConnect();
 }
 
-init();
+server.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Widget available at http://localhost:${PORT}/widget.js`);
+});
+
+connectTrueConfWithRetry();
