@@ -29,4 +29,4 @@ In the Render Dashboard, add the following key-value pairs in the **Environment*
 4. Render will automatically detect `package.json`, install dependencies, and start the server using `npm start`.
 
 ---
-Refer to [README.md](file:///Users/tuanbm/trueconf_chatbot/README.md) for integration and security details.
+Refer to [README.md](README.md) for integration and security details.
